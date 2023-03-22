@@ -40,25 +40,34 @@ def fetch_subs(youtube):
         response = request.execute()
         for item in response['items']:
             subs.append(item['snippet']['resourceId']['channelId'])
+        print("fetched {} subs".format(len(subs)))
         if 'nextPageToken' not in response:
             break
         else:
             nextPageToken = response['nextPageToken']
-    
+        
     return subs
 
 def search_in_subs(youtube, subs):
     search_results = []
     for sub in subs:
-        request = youtube.search().list(
-            part="snippet",
-            maxResults=25,
-            q="python",
-            channelId=sub
-        ) 
-        response = request.execute()
-        for item in response['items']:
-            search_results.append(item['snippet']['title'])
+        nextPageToken = ''
+        while True:
+            request = youtube.search().list(
+                part="snippet",
+                maxResults=25,
+                q="python",
+                channelId=sub,
+                pageToken=nextPageToken
+            ) 
+            response = request.execute()
+            for item in response['items']:
+                search_results.append(item['snippet']['title'])
+            print("fetched {} results".format(len(search_results)))
+            if 'nextPageToken' not in response:
+                break
+            else:
+                nextPageToken = response['nextPageToken']
 
     return search_results
 
